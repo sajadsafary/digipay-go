@@ -1,0 +1,683 @@
+openapi: 3.0.0
+info:
+  description: DigiPay Unified Payment Gateway (UPG) API - Wallet and BNPL (Buy Now
+    Pay Later) purchase flow
+  title: DigiPay UPG API
+  version: 1.0.0
+servers:
+- description: Production
+  url: https://api.mydigipay.com/digipay/api
+- description: Staging (UAT)
+  url: https://uat.mydigipay.info/digipay/api
+tags:
+- description: DigiPay OAuth2 (Resource Owner Password Credentials) authentication
+  name: Auth
+- description: DigiPay UPG purchase flow (api.mydigipay.com/digipay/api) - covers
+    Wallet and BNPL ticket types
+  name: Purchase
+paths:
+  /oauth/token:
+    post:
+      description: Authenticates with username/password (Resource Owner Password Credentials
+        grant) using the client's Basic auth credentials
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: "#/components/schemas/TokenRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TokenResponse"
+          description: Access token response
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Invalid credentials
+      security:
+      - basicAuth: []
+      summary: Obtain Access Token
+      tags:
+      - Auth
+  /tickets/business:
+    post:
+      description: Initiates a purchase (Wallet or BNPL depending on the type query
+        param) and returns a redirectUrl for the customer to complete payment on
+      parameters:
+      - explode: true
+        in: query
+        name: type
+        required: true
+        schema:
+          enum:
+          - 0
+          - 5
+          - 11
+          - 13
+          - 24
+          type: integer
+          x-enum-varnames:
+          - IPG
+          - CREDIT
+          - WALLET
+          - BNPL
+          - CREDIT_CARD
+        style: form
+      - explode: false
+        in: header
+        name: Agent
+        required: true
+        schema:
+          example: WEB
+          type: string
+        style: simple
+      - explode: false
+        in: header
+        name: Digipay-Version
+        required: true
+        schema:
+          description: API version in DD-MM-YYYY format
+          example: 2022-02-02
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TicketRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TicketResponse"
+          description: "Purchase ticket created, redirect the customer to redirectUrl"
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Bad Request (Invalid input or parameters)
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Unauthorized (invalid or expired access token)
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Business error (see result.status)
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Internal Server Error
+      security:
+      - bearerAuth: []
+      summary: Create Purchase Ticket
+      tags:
+      - Purchase
+  /purchases/verify:
+    post:
+      description: Confirms the purchase referenced by the ticket's trackingCode after
+        the customer returns from the payment page
+      parameters:
+      - explode: true
+        in: query
+        name: type
+        required: true
+        schema:
+          enum:
+          - 0
+          - 5
+          - 11
+          - 13
+          - 24
+          type: integer
+          x-enum-varnames:
+          - IPG
+          - CREDIT
+          - WALLET
+          - BNPL
+          - CREDIT_CARD
+        style: form
+      - explode: false
+        in: header
+        name: Agent
+        required: true
+        schema:
+          example: WEB
+          type: string
+        style: simple
+      - explode: false
+        in: header
+        name: Digipay-Version
+        required: true
+        schema:
+          description: API version in DD-MM-YYYY format
+          example: 2022-02-02
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/VerifyRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VerifyResponse"
+          description: Purchase verified/confirmed
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Unauthorized (invalid or expired access token)
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Business error (see result.status)
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Internal Server Error
+      security:
+      - bearerAuth: []
+      summary: Verify Purchase
+      tags:
+      - Purchase
+  /purchases/deliver:
+    post:
+      description: "Marks the purchased goods/services as delivered. Mandatory step\
+        \ for CREDIT and BNPL type purchases only, must be called after Verify"
+      parameters:
+      - explode: true
+        in: query
+        name: type
+        required: true
+        schema:
+          enum:
+          - 0
+          - 5
+          - 11
+          - 13
+          - 24
+          type: integer
+          x-enum-varnames:
+          - IPG
+          - CREDIT
+          - WALLET
+          - BNPL
+          - CREDIT_CARD
+        style: form
+      - explode: false
+        in: header
+        name: Agent
+        required: true
+        schema:
+          example: WEB
+          type: string
+        style: simple
+      - explode: false
+        in: header
+        name: Digipay-Version
+        required: true
+        schema:
+          description: API version in DD-MM-YYYY format
+          example: 2022-02-02
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/DeliverRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeliverResponse"
+          description: Delivery registered
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Unauthorized (invalid or expired access token)
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Business error (see result.status)
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Internal Server Error
+      security:
+      - bearerAuth: []
+      summary: Deliver Purchase
+      tags:
+      - Purchase
+components:
+  parameters:
+    TicketTypeParam:
+      explode: true
+      in: query
+      name: type
+      required: true
+      schema:
+        enum:
+        - 0
+        - 5
+        - 11
+        - 13
+        - 24
+        type: integer
+        x-enum-varnames:
+        - IPG
+        - CREDIT
+        - WALLET
+        - BNPL
+        - CREDIT_CARD
+      style: form
+    AgentHeader:
+      explode: false
+      in: header
+      name: Agent
+      required: true
+      schema:
+        example: WEB
+        type: string
+      style: simple
+    DigipayVersionHeader:
+      explode: false
+      in: header
+      name: Digipay-Version
+      required: true
+      schema:
+        description: API version in DD-MM-YYYY format
+        example: 2022-02-02
+        type: string
+      style: simple
+  schemas:
+    TokenRequest:
+      example:
+        username: username
+        password: password
+        grant_type: password
+      properties:
+        username:
+          type: string
+        password:
+          type: string
+        grant_type:
+          default: password
+          enum:
+          - password
+          type: string
+      required:
+      - grant_type
+      - password
+      - username
+      type: object
+    TokenResponse:
+      additionalProperties: true
+      example:
+        access_token: eyJhbGciOiJSUzI1NiIsInR5cCI6Ikxxx
+        token_type: bearer
+        refresh_token: eyJhbGciOiJSUzI1NiIsInR5cCI6xxxx
+        expires_in: 3599
+        scope: USER WALLET_BUSINESS_INTEGRATION BUSINESS_API
+        jti: RkuR_-p7mSP4VJzYrxZpRvGI5ww
+      properties:
+        access_token:
+          type: string
+        token_type:
+          type: string
+        refresh_token:
+          type: string
+        expires_in:
+          format: int64
+          type: integer
+        scope:
+          type: string
+        jti:
+          type: string
+      required:
+      - access_token
+      - expires_in
+      - token_type
+      type: object
+    Result:
+      example:
+        title: SUCCESS
+        status: 0
+        message: عملیات با موفقیت انجام شد
+        level: INFO
+      properties:
+        title:
+          type: string
+        status:
+          description: "not exhaustive, other codes may be returned by DigiPay"
+          enum:
+          - 0
+          - 1054
+          - 9000
+          - 9001
+          - 9003
+          - 9004
+          - 9007
+          - 9010
+          type: integer
+          x-enum-varnames:
+          - Success
+          - InvalidInput
+          - PurchaseNotFound
+          - TokenInvalid
+          - PurchaseExpired
+          - PurchaseNotPayable
+          - DuplicatePurchase
+          - VerificationFailed
+        message:
+          type: string
+        level:
+          example: INFO
+          type: string
+      required:
+      - message
+      - status
+      type: object
+    BasketItem:
+      example:
+        sellerId: seller-id
+        supplierId: supplier-id
+        productCode: product-code
+        brand: brand
+        productType: 1
+        count: 1
+        categoryId: category-id
+      properties:
+        sellerId:
+          type: string
+        supplierId:
+          type: string
+        productCode:
+          type: string
+        brand:
+          type: string
+        productType:
+          enum:
+          - 1
+          - 2
+          - 3
+          - 4
+          type: integer
+          x-enum-varnames:
+          - Durable
+          - Consumable
+          - Service
+          - DurableConsumable
+        count:
+          type: integer
+        categoryId:
+          type: string
+      type: object
+    BasketDetails:
+      example:
+        basketId: basket-id
+        items:
+        - sellerId: seller-id
+          supplierId: supplier-id
+          productCode: product-code
+          brand: brand
+          productType: 1
+          count: 1
+          categoryId: category-id
+      properties:
+        basketId:
+          description: required for CREDIT/BNPL purchases
+          type: string
+        items:
+          items:
+            $ref: "#/components/schemas/BasketItem"
+          type: array
+      type: object
+    AdditionalInfo:
+      example:
+        preferredGateway: 0
+      properties:
+        preferredGateway:
+          description: skips the payment method selection screen when set
+          enum:
+          - 0
+          - 2
+          type: integer
+          x-enum-varnames:
+          - Wallet
+          - IPG
+      type: object
+    TicketRequest:
+      example:
+        cellNumber: "09190070450"
+        amount: 100000000
+        providerId: providerId
+        callbackUrl: https://example.com/payments/callback/digipay
+        basketDetailsDto:
+          basketId: basket-id
+          items:
+          - sellerId: seller-id
+            supplierId: supplier-id
+            productCode: product-code
+            brand: brand
+            productType: 1
+            count: 1
+            categoryId: category-id
+        additionalInfo:
+          preferredGateway: 0
+      properties:
+        cellNumber:
+          description: customer mobile number
+          type: string
+        amount:
+          description: purchase amount in Rials
+          format: int64
+          type: integer
+        providerId:
+          description: unique merchant-generated id for this purchase
+          type: string
+        callbackUrl:
+          format: uri
+          type: string
+        basketDetailsDto:
+          $ref: "#/components/schemas/BasketDetails"
+        additionalInfo:
+          $ref: "#/components/schemas/AdditionalInfo"
+      required:
+      - amount
+      - callbackUrl
+      - cellNumber
+      - providerId
+      type: object
+    TicketResponse:
+      additionalProperties: true
+      example:
+        result:
+          title: SUCCESS
+          status: 0
+          message: عملیات با موفقیت انجام شد
+          level: INFO
+        ticket: v2:ab17ec383d654be3b009f9fc45202f80
+        redirectUrl: https://web.mydigipay.info/web-pay/tgs/v2:ab17ec383d654be3b009f9fc45202f80
+      properties:
+        result:
+          $ref: "#/components/schemas/Result"
+        ticket:
+          description: unique identifier for this purchase session
+          type: string
+        redirectUrl:
+          description: customer is redirected here to complete payment
+          format: uri
+          type: string
+      required:
+      - redirectUrl
+      - result
+      - ticket
+      type: object
+    VerifyRequest:
+      example:
+        trackingCode: "5239470511667728782510"
+        providerId: providerId
+      properties:
+        trackingCode:
+          description: purchase tracking code
+          type: string
+        providerId:
+          description: same providerId sent during ticket creation
+          type: string
+      required:
+      - providerId
+      - trackingCode
+      type: object
+    VerifyAdditionalInfo:
+      example:
+        prepaymentAmount: 0
+        cashAmount: 0
+        creditAmount: 100000000
+        instantFinalization: true
+        generateInvoice: true
+      properties:
+        prepaymentAmount:
+          format: int64
+          type: integer
+        cashAmount:
+          format: int64
+          type: integer
+        creditAmount:
+          format: int64
+          type: integer
+        instantFinalization:
+          type: boolean
+        generateInvoice:
+          type: boolean
+      type: object
+    VerifyResponse:
+      additionalProperties: true
+      example:
+        result:
+          title: SUCCESS
+          status: 0
+          message: عملیات با موفقیت انجام شد
+          level: INFO
+        trackingCode: "5239470511667728782510"
+        providerId: providerId
+        amount: "100000000"
+        additionalInfo:
+          prepaymentAmount: 0
+          cashAmount: 0
+          creditAmount: 100000000
+          instantFinalization: true
+          generateInvoice: true
+      properties:
+        result:
+          $ref: "#/components/schemas/Result"
+        trackingCode:
+          type: string
+        providerId:
+          type: string
+        amount:
+          type: string
+        additionalInfo:
+          $ref: "#/components/schemas/VerifyAdditionalInfo"
+      required:
+      - result
+      - trackingCode
+      type: object
+    DeliverRequest:
+      example:
+        deliveryDate: 1592502763000
+        invoiceNumber: "7471288365484"
+        trackingCode: "5239470511667728782510"
+        products:
+        - product-4
+        - product-5
+      properties:
+        deliveryDate:
+          description: "delivery time, epoch milliseconds"
+          format: int64
+          type: integer
+        invoiceNumber:
+          type: string
+        trackingCode:
+          type: string
+        products:
+          items:
+            type: string
+          type: array
+      required:
+      - deliveryDate
+      - invoiceNumber
+      - products
+      - trackingCode
+      type: object
+    DeliverResponse:
+      additionalProperties: true
+      example:
+        result:
+          title: SUCCESS
+          status: 0
+          message: عملیات با موفقیت انجام شد
+          level: INFO
+      properties:
+        result:
+          $ref: "#/components/schemas/Result"
+      required:
+      - result
+      type: object
+    ErrorResponse:
+      additionalProperties: true
+      example:
+        title: FAILURE
+        status: 9010
+        message: عملیات ناموفق بود
+        level: ERROR
+      properties:
+        title:
+          type: string
+        status:
+          type: integer
+        message:
+          type: string
+        level:
+          type: string
+      type: object
+  securitySchemes:
+    basicAuth:
+      scheme: basic
+      type: http
+    bearerAuth:
+      bearerFormat: JWT
+      scheme: bearer
+      type: http
