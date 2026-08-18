@@ -7,7 +7,7 @@ Name | Type | Description | Notes
 **Result** | [**Result**](Result.md) |  | 
 **TrackingCode** | **string** |  | 
 **ProviderId** | Pointer to **string** |  | [optional] 
-**Amount** | Pointer to **string** |  | [optional] 
+**Amount** | Pointer to **interface{}** |  | [optional] 
 **AdditionalInfo** | Pointer to [**VerifyAdditionalInfo**](VerifyAdditionalInfo.md) |  | [optional] 
 
 ## Methods
@@ -96,20 +96,20 @@ HasProviderId returns a boolean if a field has been set.
 
 ### GetAmount
 
-`func (o *VerifyResponse) GetAmount() string`
+`func (o *VerifyResponse) GetAmount() interface{}`
 
 GetAmount returns the Amount field if non-nil, zero value otherwise.
 
 ### GetAmountOk
 
-`func (o *VerifyResponse) GetAmountOk() (*string, bool)`
+`func (o *VerifyResponse) GetAmountOk() (*interface{}, bool)`
 
 GetAmountOk returns a tuple with the Amount field if it's non-nil, zero value otherwise
 and a boolean to check if the value has been set.
 
 ### SetAmount
 
-`func (o *VerifyResponse) SetAmount(v string)`
+`func (o *VerifyResponse) SetAmount(v interface{})`
 
 SetAmount sets Amount field to given value.
 
@@ -119,6 +119,16 @@ SetAmount sets Amount field to given value.
 
 HasAmount returns a boolean if a field has been set.
 
+### SetAmountNil
+
+`func (o *VerifyResponse) SetAmountNil(b bool)`
+
+ SetAmountNil sets the value for Amount to be an explicit nil
+
+### UnsetAmount
+`func (o *VerifyResponse) UnsetAmount()`
+
+UnsetAmount ensures that no value is present for Amount, not even an explicit nil
 ### GetAdditionalInfo
 
 `func (o *VerifyResponse) GetAdditionalInfo() VerifyAdditionalInfo`

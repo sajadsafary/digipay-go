@@ -607,8 +607,7 @@ components:
           type: string
         providerId:
           type: string
-        amount:
-          type: string
+        amount: {}
         additionalInfo:
           $ref: "#/components/schemas/VerifyAdditionalInfo"
       required:

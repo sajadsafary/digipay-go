@@ -23,7 +23,7 @@ type VerifyResponse struct {
 	Result Result `json:"result"`
 	TrackingCode string `json:"trackingCode"`
 	ProviderId *string `json:"providerId,omitempty"`
-	Amount *string `json:"amount,omitempty"`
+	Amount interface{} `json:"amount,omitempty"`
 	AdditionalInfo *VerifyAdditionalInfo `json:"additionalInfo,omitempty"`
 	AdditionalProperties map[string]interface{}
 }
@@ -129,22 +129,23 @@ func (o *VerifyResponse) SetProviderId(v string) {
 	o.ProviderId = &v
 }
 
-// GetAmount returns the Amount field value if set, zero value otherwise.
-func (o *VerifyResponse) GetAmount() string {
-	if o == nil || IsNil(o.Amount) {
-		var ret string
+// GetAmount returns the Amount field value if set, zero value otherwise (both if not set or set to explicit null).
+func (o *VerifyResponse) GetAmount() interface{} {
+	if o == nil {
+		var ret interface{}
 		return ret
 	}
-	return *o.Amount
+	return o.Amount
 }
 
 // GetAmountOk returns a tuple with the Amount field value if set, nil otherwise
 // and a boolean to check if the value has been set.
-func (o *VerifyResponse) GetAmountOk() (*string, bool) {
+// NOTE: If the value is an explicit nil, `nil, true` will be returned
+func (o *VerifyResponse) GetAmountOk() (*interface{}, bool) {
 	if o == nil || IsNil(o.Amount) {
 		return nil, false
 	}
-	return o.Amount, true
+	return &o.Amount, true
 }
 
 // HasAmount returns a boolean if a field has been set.
@@ -156,9 +157,9 @@ func (o *VerifyResponse) HasAmount() bool {
 	return false
 }
 
-// SetAmount gets a reference to the given string and assigns it to the Amount field.
-func (o *VerifyResponse) SetAmount(v string) {
-	o.Amount = &v
+// SetAmount gets a reference to the given interface{} and assigns it to the Amount field.
+func (o *VerifyResponse) SetAmount(v interface{}) {
+	o.Amount = v
 }
 
 // GetAdditionalInfo returns the AdditionalInfo field value if set, zero value otherwise.
@@ -208,7 +209,7 @@ func (o VerifyResponse) ToMap() (map[string]interface{}, error) {
 	if !IsNil(o.ProviderId) {
 		toSerialize["providerId"] = o.ProviderId
 	}
-	if !IsNil(o.Amount) {
+	if o.Amount != nil {
 		toSerialize["amount"] = o.Amount
 	}
 	if !IsNil(o.AdditionalInfo) {
