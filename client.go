@@ -648,22 +648,48 @@ func (e GenericOpenAPIError) Model() interface{} {
 	return e.model
 }
 
-// format error message using title and detail when model implements rfc7807
+// format error message using title and detail when model implements rfc7807,
+// falling back to "Message" (DigiPay's ErrorResponse shape doesn't follow
+// rfc7807 - it has no "Detail" field). Hand-patched: the original template
+// output formatted whatever FieldByName("Title")/("Detail") returned with
+// %s unconditionally, which produces "%!s(*string=<nil>)" garbage instead
+// of an empty string when the field is a nil pointer (DigiPay's Title is
+// frequently unset). Re-apply this patch if client.go is ever regenerated.
 func formatErrorMessage(status string, v interface{}) string {
 	str := ""
 	metaValue := reflect.ValueOf(v).Elem()
 
 	if metaValue.Kind() == reflect.Struct {
-		field := metaValue.FieldByName("Title")
-		if field != (reflect.Value{}) {
-			str = fmt.Sprintf("%s", field.Interface())
+		if s, ok := reflectStringField(metaValue, "Title"); ok {
+			str = s
 		}
 
-		field = metaValue.FieldByName("Detail")
-		if field != (reflect.Value{}) {
-			str = fmt.Sprintf("%s (%s)", str, field.Interface())
+		if s, ok := reflectStringField(metaValue, "Detail"); ok {
+			str = fmt.Sprintf("%s (%s)", str, s)
+		} else if s, ok := reflectStringField(metaValue, "Message"); ok {
+			str = fmt.Sprintf("%s (%s)", str, s)
 		}
 	}
 
 	return strings.TrimSpace(fmt.Sprintf("%s %s", status, str))
+}
+
+// reflectStringField reads a string or *string field by name, returning
+// ("", false) if the field doesn't exist, isn't a string, or is a nil
+// pointer - so callers never format an untyped nil with %s.
+func reflectStringField(v reflect.Value, name string) (string, bool) {
+	field := v.FieldByName(name)
+	if field == (reflect.Value{}) {
+		return "", false
+	}
+	if field.Kind() == reflect.Ptr {
+		if field.IsNil() {
+			return "", false
+		}
+		field = field.Elem()
+	}
+	if field.Kind() != reflect.String {
+		return "", false
+	}
+	return field.String(), true
 }
