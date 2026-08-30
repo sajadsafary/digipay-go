@@ -6,6 +6,7 @@ Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**PurchasesDeliverPost**](PurchaseAPI.md#PurchasesDeliverPost) | **Post** /purchases/deliver | Deliver Purchase
 [**PurchasesVerifyPost**](PurchaseAPI.md#PurchasesVerifyPost) | **Post** /purchases/verify | Verify Purchase
+[**RefundsPost**](PurchaseAPI.md#RefundsPost) | **Post** /refunds | Refund Purchase
 [**TicketsBusinessPost**](PurchaseAPI.md#TicketsBusinessPost) | **Post** /tickets/business | Create Purchase Ticket
 
 
@@ -139,6 +140,74 @@ Name | Type | Description  | Notes
 ### Return type
 
 [**VerifyResponse**](VerifyResponse.md)
+
+### Authorization
+
+[bearerAuth](../README.md#bearerAuth)
+
+### HTTP request headers
+
+- **Content-Type**: application/json
+- **Accept**: application/json
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints)
+[[Back to Model list]](../README.md#documentation-for-models)
+[[Back to README]](../README.md)
+
+
+## RefundsPost
+
+> RefundResponse RefundsPost(ctx).Type_(type_).RefundRequest(refundRequest).Execute()
+
+Refund Purchase
+
+
+
+### Example
+
+```go
+package main
+
+import (
+	"context"
+	"fmt"
+	"os"
+	openapiclient "github.com/sajadsafary/digipay-go"
+)
+
+func main() {
+	type_ := int32(56) // int32 | 
+	refundRequest := *openapiclient.NewRefundRequest("ProviderId_example", int64(123), "SaleTrackingCode_example") // RefundRequest | 
+
+	configuration := openapiclient.NewConfiguration()
+	apiClient := openapiclient.NewAPIClient(configuration)
+	resp, r, err := apiClient.PurchaseAPI.RefundsPost(context.Background()).Type_(type_).RefundRequest(refundRequest).Execute()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error when calling `PurchaseAPI.RefundsPost``: %v\n", err)
+		fmt.Fprintf(os.Stderr, "Full HTTP response: %v\n", r)
+	}
+	// response from `RefundsPost`: RefundResponse
+	fmt.Fprintf(os.Stdout, "Response from `PurchaseAPI.RefundsPost`: %v\n", resp)
+}
+```
+
+### Path Parameters
+
+
+
+### Other Parameters
+
+Other parameters are passed through a pointer to a apiRefundsPostRequest struct via the builder pattern
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **type_** | **int32** |  | 
+ **refundRequest** | [**RefundRequest**](RefundRequest.md) |  | 
+
+### Return type
+
+[**RefundResponse**](RefundResponse.md)
 
 ### Authorization
 

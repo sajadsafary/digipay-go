@@ -81,6 +81,7 @@ Class | Method | HTTP request | Description
 *AuthAPI* | [**OauthTokenPost**](docs/AuthAPI.md#oauthtokenpost) | **Post** /oauth/token | Obtain Access Token
 *PurchaseAPI* | [**PurchasesDeliverPost**](docs/PurchaseAPI.md#purchasesdeliverpost) | **Post** /purchases/deliver | Deliver Purchase
 *PurchaseAPI* | [**PurchasesVerifyPost**](docs/PurchaseAPI.md#purchasesverifypost) | **Post** /purchases/verify | Verify Purchase
+*PurchaseAPI* | [**RefundsPost**](docs/PurchaseAPI.md#refundspost) | **Post** /refunds | Refund Purchase
 *PurchaseAPI* | [**TicketsBusinessPost**](docs/PurchaseAPI.md#ticketsbusinesspost) | **Post** /tickets/business | Create Purchase Ticket
 
 
@@ -92,6 +93,8 @@ Class | Method | HTTP request | Description
  - [DeliverRequest](docs/DeliverRequest.md)
  - [DeliverResponse](docs/DeliverResponse.md)
  - [ErrorResponse](docs/ErrorResponse.md)
+ - [RefundRequest](docs/RefundRequest.md)
+ - [RefundResponse](docs/RefundResponse.md)
  - [Result](docs/Result.md)
  - [TicketRequest](docs/TicketRequest.md)
  - [TicketResponse](docs/TicketResponse.md)

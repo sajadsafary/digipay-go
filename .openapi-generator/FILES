@@ -14,6 +14,8 @@ docs/DeliverRequest.md
 docs/DeliverResponse.md
 docs/ErrorResponse.md
 docs/PurchaseAPI.md
+docs/RefundRequest.md
+docs/RefundResponse.md
 docs/Result.md
 docs/TicketRequest.md
 docs/TicketResponse.md
@@ -30,6 +32,8 @@ model_basket_item.go
 model_deliver_request.go
 model_deliver_response.go
 model_error_response.go
+model_refund_request.go
+model_refund_response.go
 model_result.go
 model_ticket_request.go
 model_ticket_response.go

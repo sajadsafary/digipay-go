@@ -281,6 +281,80 @@ paths:
       summary: Deliver Purchase
       tags:
       - Purchase
+  /refunds:
+    post:
+      description: "Returns money for an already-completed purchase, in full or in\
+        \ part. Unlike the other purchase endpoints this one takes no Agent or Digipay-Version\
+        \ header, and its type query param is the ticket type of the *original* purchase\
+        \ being returned, not of the refund itself"
+      parameters:
+      - explode: true
+        in: query
+        name: type
+        required: true
+        schema:
+          enum:
+          - 0
+          - 5
+          - 11
+          - 13
+          - 24
+          type: integer
+          x-enum-varnames:
+          - IPG
+          - CREDIT
+          - WALLET
+          - BNPL
+          - CREDIT_CARD
+        style: form
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RefundRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RefundResponse"
+          description: Refund registered
+        "400":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Bad Request (Invalid input or parameters)
+        "401":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Unauthorized (invalid or expired access token)
+        "403":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Forbidden
+        "422":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Business error (see result.status)
+        "500":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+          description: Internal Server Error
+      security:
+      - bearerAuth: []
+      summary: Refund Purchase
+      tags:
+      - Purchase
 components:
   parameters:
     TicketTypeParam:
@@ -652,6 +726,47 @@ components:
       properties:
         result:
           $ref: "#/components/schemas/Result"
+      required:
+      - result
+      type: object
+    RefundRequest:
+      example:
+        providerId: refund-providerId
+        amount: 100000000
+        saleTrackingCode: "5239470511667728782510"
+      properties:
+        providerId:
+          description: "unique merchant-generated id for this refund, which must differ\
+            \ from the providerId of the purchase being returned"
+          type: string
+        amount:
+          description: "amount to return to the customer in Rials, up to the original\
+            \ purchase amount"
+          format: int64
+          type: integer
+        saleTrackingCode:
+          description: trackingCode of the original purchase being returned
+          type: string
+      required:
+      - amount
+      - providerId
+      - saleTrackingCode
+      type: object
+    RefundResponse:
+      additionalProperties: true
+      example:
+        result:
+          title: SUCCESS
+          status: 0
+          message: عملیات با موفقیت انجام شد
+          level: INFO
+        trackingCode: "5239470511667728782510"
+      properties:
+        result:
+          $ref: "#/components/schemas/Result"
+        trackingCode:
+          description: "tracking code of the refund itself, distinct from saleTrackingCode"
+          type: string
       required:
       - result
       type: object
